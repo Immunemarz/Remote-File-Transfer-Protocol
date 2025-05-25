@@ -268,7 +268,7 @@ do
 		}
 		size_t dataSize = jpgbytes.size();
 		cout << "datasize is: " << dataSize << endl;
-    //got help a little from internet here cause I was getting a weird error for like 30 min
+    
     send(cs, &dataSize, sizeof(dataSize), 0); 
     if (dataSize > 0) {
         int numberSent = send(cs, jpgbytes.data(), dataSize, 0); 
