@@ -1,0 +1,284 @@
+#include <iostream>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <string.h>
+#include <sstream>
+#include <unistd.h>
+#include <serializer.h>
+
+using namespace std;
+
+
+
+string* tempuser;
+string* tempPass;
+bool userBool = false;
+bool passBool = false; // once it becomes true it is always true
+int main(void)
+{
+	string username = "ryan";
+	string password = "icecream";
+
+
+	// Create socket
+	int s = socket(PF_INET, SOCK_STREAM, 0);
+
+	if (s <= 0)
+	{
+		cerr << "server:main(): Socket creation failed." << endl;
+		return -1;
+	}
+
+	// Do the bind a PORT to the socket
+	sockaddr_in address;
+  int addressSize = sizeof(sockaddr);
+  address.sin_family=AF_INET;
+  address.sin_addr.s_addr = INADDR_ANY;
+  address.sin_port  = htons(15000); // <---------------- port is 15000
+
+	int status = bind(s, (struct sockaddr*) &address, addressSize);
+
+	// Wait for client to connect using listen
+	cout << "server: Waiting for client to connect..." << endl;
+	listen(s,3); // up to 3 clients can connect
+
+	// Accept returns a NEW socket for the client we will talk to
+	int cs = accept(s, (struct sockaddr*) &address, (socklen_t *) &addressSize);
+
+	cout << "server: Server and client established communication." << endl;
+
+	// Create a buffer to put messages in
+	const int BUFFER_SIZE = 1024;
+	char buffer[BUFFER_SIZE];
+
+do
+{
+
+	cout << "server: Waiting for COMMAND: " << endl;
+	
+	//cout << "server: COMMAND: User received: " << endl;
+
+
+
+
+
+
+	recv(cs,buffer,BUFFER_SIZE,0);
+
+
+	//cout << "THE BUFFER IS: " << buffer << endl;
+  string originalString = buffer;
+    
+  // Create an input string stream to extract words.
+  istringstream iss(originalString);
+    
+	string firstWord;
+
+	string secondWord;
+  
+	
+
+
+    // Extract the first word using the stream.
+  iss >> firstWord;
+	//cout << firstWord << "first word" << endl;
+	 //try moving
+	//cout << secondWord << " Second word " << endl;
+
+
+	//cout << "COMMAND " << firstWord << " received" << endl;
+  
+
+
+	if(firstWord == "user")
+	{
+		iss >> secondWord;
+		cout << "server: COMMAND: " << firstWord << " received. Second Word is:" << secondWord << endl;
+		tempuser = &secondWord;
+		if(*tempuser == username){
+			userBool = true;
+			//cout << "it is == to username! " << endl;
+			
+		}
+			
+	}
+
+	else if(firstWord == "password")
+	{
+		iss >> secondWord;
+		cout << "server: COMMAND: " << firstWord << " received. Second Word is:" << secondWord << endl;
+		tempPass = &secondWord;
+		if(*tempPass == password){
+			passBool = true;
+			//cout << "it is == to password! " << endl;
+		}
+			
+	}
+	cout << userBool << "TEMPUSERRR" << endl;
+	cout << passBool << "TEMPPASSSSS" << endl;
+
+	  if(userBool == true && passBool == true)
+	  {
+	  	//cout << " hitting true " << endl;
+	 		send(cs,true);
+	  }
+	  else
+	  {
+	 	send(cs,false);
+	  }
+	
+
+}while(buffer != "exit");
+
+	close(cs);
+	close(s);
+
+	return 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+	if(firstWord == "help")
+	{
+		//iss >> secondWord;
+		cout << "server: COMMAND: " << firstWord << " received. " << endl;
+		string help = "HELP: lists ftp commands with explanations \n USER: specifies a user for authentication \nPASSWORD: specifies a user's password for authentication \n DIR: lists the files in the server's current directory \n CD <path>: changes the server's current directory to the new path. The path can be relative or absolute \n LCD <path>: changes the client's current directory to the new path. The path can be relative or absolute \n DEL <filename>: deletes the server file specified by <filename> in the current directory \n GET <filename>: gets the server file specified by <filename> in the current directory and places the file in the client directory using the same <filename> \n PUT <filename>: puts the client file specified by <filename> in the current directory and places the file in the server directory using the same <filename>";
+		send(cs,help);
+		// cout << "HELP: lists ftp commands with explanations" << endl;
+		// cout << "USER: specifies a user for authentication" << endl;
+		// cout << "PASSWORD: specifies a user's password for authentication" << endl;
+		// cout << "DIR: lists the files in the server's current directory" << endl;
+		// cout << "CD <path>: changes the server's current directory to the new path. The path can be relative or absolute" << endl;
+		// cout << "LCD <path>: changes the client's current directory to the new path. The path can be relative or absolute" << endl;
+		// cout << "DEL <filename>: deletes the server file specified by <filename> in the current directory" << endl;
+		// cout << "GET <filename>: gets the server file specified by <filename> in the current directory and places the file in the client directory using the same <filename>" << endl;
+		// cout << "PUT <filename>: puts the client file specified by <filename> in the current directory and places the file in the server directory using the same <filename>" << endl;
+			
+		}
+			
+	
+
+	else if(firstWord == "dir")
+	{
+		
+		iss >> secondWord;
+		cout << "server: COMMAND: " << firstWord << " received. Second Word is:" << secondWord << endl;
+    string path = "/client/";
+    for (const auto & entry : fs::directory_iterator(path))
+        cout << entry.path() << endl;
+
+				
+	}
+			
+	
+
+*/
+
+
+
+
+
+
+
+
+
+
+#include <iostream>
+#include <cstring>
+#include <dirent.h>
+#include <unistd.h>
+
+int main() {
+    // Get the current working directory
+    char currentDirectory[PATH_MAX];
+    if (getcwd(currentDirectory, sizeof(currentDirectory)) == nullptr) {
+        std::cerr << "Error getting current working directory." << std::endl;
+        return 1;
+    }
+
+    // Print the current working directory
+    std::cout << "Current working directory: " << currentDirectory << std::endl;
+
+    // Open the current directory
+    DIR* dir = opendir(currentDirectory);
+
+    // Check if the directory was opened successfully
+    if (dir == nullptr) {
+        std::cerr << "Error opening current directory." << std::endl;
+        return 1;
+    }
+
+    // Read directory entries
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        // Skip "." and ".." directory entries
+        if (std::strcmp(entry->d_name, ".") == 0 || std::strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        // Print the name of the file or subdirectory
+        std::cout << entry->d_name << std::endl;
+    }
+
+    // Close the directory
+    closedir(dir);
+
+    return 0;
+}
+
+
+
+
+//to get current directory::::
+	// help from internet here
+	char currentDirectory[PATH_MAX];
+	if (getcwd(currentDirectory, sizeof(currentDirectory)) == nullptr) {
+			cerr << "Error getting current working directory." << endl;
+			return 1;
+	}
+
+
+
+
+
+
+	string originalString = buffer;
+    
+
+  istringstream iss(originalString);
+    
+	string firstWord;
+
+	string secondWord;
+  
+	
+
+
+ 
+  iss >> firstWord;
+
+
+
+//take bytes of file from vector send over socket client recv with bytes in vector and then ofstream with second word
+
+	open file in binary that I wrote in vscode with internet help 
+
+
+    ifstream file("image.jpg", ios::binary);
+
+		vector<char> fileData((istreambuf_iterator<char>(file)),istreambuf_iterator<char>());
+		more in notes
+		
